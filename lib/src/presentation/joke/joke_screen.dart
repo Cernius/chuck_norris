@@ -1,7 +1,8 @@
 import 'package:chuck_norris/src/domain/models/joke.dart';
-import 'package:chuck_norris/src/presentation/common/base_page.dart';
+import 'package:chuck_norris/src/presentation/common/stateless_extensions.dart';
 import 'package:chuck_norris/src/presentation/common/theme/colors.dart';
 import 'package:chuck_norris/src/presentation/common/theme/font_sizes.dart';
+import 'package:chuck_norris/src/presentation/common/theme/images.dart';
 import 'package:chuck_norris/src/presentation/common/theme/paddings.dart';
 import 'package:chuck_norris/src/presentation/common/theme/sizes.dart';
 import 'package:chuck_norris/src/presentation/joke/bloc/joke_bloc.dart';
@@ -9,7 +10,7 @@ import 'package:chuck_norris/src/presentation/joke/joke_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class JokeScreen extends StatelessWidget with BasePage {
+class JokeScreen extends StatelessWidget {
   final String? categoryName;
   final List<Joke> jokeList;
   final Joke? singleJoke;
@@ -28,7 +29,7 @@ class JokeScreen extends StatelessWidget with BasePage {
           backgroundColor: Colors.white,
           leading: IconButton(
             onPressed: () {
-              nav.back();
+              getNav().goBack();
             },
             icon: const Icon(
               Icons.close,
@@ -65,7 +66,7 @@ class JokeScreen extends StatelessWidget with BasePage {
   }
 }
 
-class _BuildNoJokesScreen extends StatelessWidget with BasePage {
+class _BuildNoJokesScreen extends StatelessWidget {
   _BuildNoJokesScreen({Key? key}) : super(key: key);
 
   @override
@@ -93,8 +94,8 @@ class _BuildJoke extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _BuildIcon(
-            iconPath: data.currentJoke!.iconUrl,
+          const _BuildIcon(
+            iconPath: GetImages.chuckNorris,
           ),
           _BuildJokeText(text: data.currentJoke!.jokeValue),
           const Spacer(),
@@ -119,7 +120,7 @@ class _BuildIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: GetPadding.padding_23),
-      child: Image.network(
+      child: Image.asset(
         iconPath,
         height: Sizes.imageSize,
         width: Sizes.imageSize,
@@ -146,7 +147,7 @@ class _BuildJokeText extends StatelessWidget {
   }
 }
 
-class _BuildNextRandomJokeButton extends StatelessWidget with BasePage {
+class _BuildNextRandomJokeButton extends StatelessWidget {
   final JokeData data;
 
   _BuildNextRandomJokeButton({Key? key, required this.data}) : super(key: key);

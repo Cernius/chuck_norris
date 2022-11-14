@@ -1,8 +1,8 @@
 import 'package:chuck_norris/src/common/app_module.dart';
 import 'package:chuck_norris/src/presentation/categories/bloc/categories_bloc.dart';
 import 'package:chuck_norris/src/presentation/categories/categories_data.dart';
-import 'package:chuck_norris/src/presentation/common/base_page.dart';
 import 'package:chuck_norris/src/presentation/common/reusable_widgets/loading_indicator.dart';
+import 'package:chuck_norris/src/presentation/common/stateless_extensions.dart';
 import 'package:chuck_norris/src/presentation/common/theme/colors.dart';
 import 'package:chuck_norris/src/presentation/common/theme/font_sizes.dart';
 import 'package:chuck_norris/src/presentation/common/theme/paddings.dart';
@@ -10,7 +10,9 @@ import 'package:chuck_norris/src/presentation/common/theme/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CategoriesScreen extends StatelessWidget with BasePage {
+import '../../common/router.dart';
+
+class CategoriesScreen extends StatelessWidget {
   CategoriesScreen({Key? key}) : super(key: key);
 
   @override
@@ -59,7 +61,7 @@ class CategoriesScreen extends StatelessWidget with BasePage {
   }
 }
 
-class _BuildTitle extends StatelessWidget with BasePage {
+class _BuildTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -75,7 +77,7 @@ class _BuildTitle extends StatelessWidget with BasePage {
   }
 }
 
-class _BuildSearchField extends StatelessWidget with BasePage {
+class _BuildSearchField extends StatelessWidget {
   _BuildSearchField({Key? key}) : super(key: key);
 
   @override
@@ -130,7 +132,7 @@ class _BuildSearchField extends StatelessWidget with BasePage {
   }
 }
 
-class _BuildSmallTitle extends StatelessWidget with BasePage {
+class _BuildSmallTitle extends StatelessWidget {
   final bool textFieldFocus;
 
   _BuildSmallTitle({Key? key, required this.textFieldFocus}) : super(key: key);
@@ -151,7 +153,7 @@ class _BuildSmallTitle extends StatelessWidget with BasePage {
   }
 }
 
-class _BuildGridView extends StatelessWidget with BasePage {
+class _BuildGridView extends StatelessWidget {
   final List<String> categories;
   final bool textFieldFocus;
 
@@ -180,9 +182,18 @@ class _BuildGridView extends StatelessWidget with BasePage {
         itemBuilder: (BuildContext ctx, index) {
           return _BuildCategoryCard(
             categoryName: categories[index],
-            onPressed: () {
-              BlocProvider.of<CategoriesBloc>(context)
+            onPressed: () async {
+              final joke = await BlocProvider.of<CategoriesBloc>(context)
                   .getJoke(categories[index]);
+
+              getNav().navigateTo(
+                jokeScreen,
+                arguments: JokeScreenArguments(
+                  categoryName: categories[index],
+                  jokeList: [],
+                  singleJoke: joke,
+                ),
+              );
             },
           );
         },

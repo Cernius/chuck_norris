@@ -1,10 +1,14 @@
-import 'package:chuck_norris/src/common/app.locator.dart';
-import 'package:chuck_norris/src/common/app.router.dart';
+import 'package:chuck_norris/src/common/app_module.dart';
+import 'package:chuck_norris/src/common/navigation_service.dart';
+import 'package:chuck_norris/src/common/router.dart';
 import 'package:flutter/material.dart';
-import 'package:stacked_services/stacked_services.dart';
+import 'package:chuck_norris/src/common/router.dart' as router;
 
 void main() async {
-  setupLocator();
+  print(injector.get<NavigationService>().navigatorKey);
+  WidgetsFlutterBinding.ensureInitialized();
+
+
   runApp(const MyApp());
 }
 
@@ -17,11 +21,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       restorationScopeId: 'app',
       debugShowCheckedModeBanner: false,
-      navigatorObservers: [
-        StackedService.routeObserver,
-      ],
-      navigatorKey: StackedService.navigatorKey,
-      onGenerateRoute: StackedRouter().onGenerateRoute,
+      initialRoute: categoriesScreen,
+      navigatorKey: injector.get<NavigationService>().navigatorKey,
+      onGenerateRoute: router.generateRoute,
     );
   }
 }

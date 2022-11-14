@@ -16,11 +16,10 @@ dependencies:
   flutter_simple_dependency_injection: ^2.0.0
   path_provider: ^2.0.8
   http: ^0.13.4
-  stacked: ^2.2.7+1
-  stacked_services: ^0.8.15
   flutter_lints: ^1.0.0
   build_runner: ^2.1.5
   stacked_generator: ^0.5.6
+  logger: ^1.1.0
 
 dev_dependencies:
   flutter_test:

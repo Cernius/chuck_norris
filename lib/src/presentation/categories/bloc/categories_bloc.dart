@@ -1,11 +1,11 @@
-import 'package:chuck_norris/src/common/app.locator.dart';
-import 'package:chuck_norris/src/common/app.router.dart';
+import 'package:chuck_norris/src/common/app_module.dart';
+import 'package:chuck_norris/src/common/navigation_service.dart';
+import 'package:chuck_norris/src/common/router.dart';
 import 'package:chuck_norris/src/domain/models/joke.dart';
 import 'package:chuck_norris/src/domain/repositories/category_repository.dart';
 import 'package:chuck_norris/src/domain/repositories/joke_repository.dart';
 import 'package:chuck_norris/src/presentation/categories/categories_data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stacked_services/stacked_services.dart';
 
 class CategoriesBloc extends Cubit<CategoriesData> {
   final CategoryRepository _categoryRepository;
@@ -24,21 +24,14 @@ class CategoriesBloc extends Cubit<CategoriesData> {
 
   Future<void> getData() async {
     List<String> categories = await _categoryRepository.getAllCategories();
-    emit(state.copyWith(categories: categories, loading: false));
+    if (!isClosed) emit(state.copyWith(categories: categories, loading: false));
   }
 
-  Future<void> getJoke(String categoryName) async {
+  Future<Joke> getJoke(String categoryName) async {
     emit(state.copyWith(loading: true));
     Joke joke = await _jokeRepository.getJoke(categoryName);
     emit(state.copyWith(jokeList: [], loading: false));
-    locator.get<NavigationService>().navigateTo(
-          Routes.jokeScreen,
-          arguments: JokeScreenArguments(
-            categoryName: categoryName,
-            jokeList: state.jokeList,
-            singleJoke: joke,
-          ),
-        );
+   return joke;
   }
 
   void searchQuery(String value) {
@@ -49,10 +42,9 @@ class CategoriesBloc extends Cubit<CategoriesData> {
     emit(state.copyWith(loading: true));
     List<Joke> jokeList =
         await _jokeRepository.getRandomJokes(state.searchQuery);
-
     emit(state.copyWith(jokeList: [], loading: false));
-    locator.get<NavigationService>().navigateTo(
-          Routes.jokeScreen,
+    injector.get<NavigationService>().navigateTo(
+          jokeScreen,
           arguments: JokeScreenArguments(
             categoryName: state.searchQuery,
             jokeList: jokeList,
