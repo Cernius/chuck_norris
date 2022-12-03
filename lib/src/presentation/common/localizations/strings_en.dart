@@ -2,17 +2,13 @@ import 'package:chuck_norris/src/presentation/common/localizations/strings.dart'
 
 class StringsEn extends Strings {
   @override
-  String get chuckNorris => "Chuck Norris";
+  String get top10 => "Top #10";
 
   @override
-  String get searchForJoke => "Search for a random joke";
+  String get topCommunitiesOnOutgrid => "Top Communities on Outgrid";
 
   @override
-  String get orChooseCategory => "Or choose a joke";
 
-  @override
-  String get anotherJoke => "Another Random Joke";
+  String get viewAll => "View all";
 
-  @override
-  String get sorryNoJokes => "Sorry there was no jokes containing your keyword";
 }

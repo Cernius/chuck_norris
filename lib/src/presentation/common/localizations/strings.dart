@@ -1,11 +1,9 @@
 abstract class Strings {
-  String get anotherJoke;
 
-  String get chuckNorris;
 
-  String get searchForJoke;
+  String get top10 ;
 
-  String get orChooseCategory;
+  String get topCommunitiesOnOutgrid ;
 
-  String get sorryNoJokes;
+  String get viewAll;
 }

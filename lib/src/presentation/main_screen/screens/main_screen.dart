@@ -6,6 +6,7 @@ import 'package:chuck_norris/src/presentation/main_screen/bloc/main_screen_bloc.
 import 'package:chuck_norris/src/presentation/main_screen/states/animated_widget_state.dart';
 import 'package:chuck_norris/src/presentation/main_screen/states/main_screen_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 final GlobalKey _widgetKey = GlobalKey();
@@ -17,6 +18,17 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(0.0),
+        child: AppBar(
+          backgroundColor: Colors.grey[800],
+          elevation: 0,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.dark,
+          ),
+        ),
+      ),
       body: MultiBlocProvider(
         providers: [
           BlocProvider(
@@ -34,9 +46,8 @@ class MainScreen extends StatelessWidget {
           builder: (context, state) {
             return BlocBuilder<AnimatedWidgetBloc, AnimatedWidgetState>(
               builder: (context, animatedState) {
-                print(animatedState.topOffset);
                 return Stack(
-                  fit: StackFit.expand,
+                  alignment: Alignment.center,
                   children: [
                     ListView(
                       children: [
@@ -51,11 +62,12 @@ class MainScreen extends StatelessWidget {
                         const _SomeWidget(height: 200),
                       ],
                     ),
-                    if (animatedState.isExpanded == true)
+                    if (animatedState.startAnimation == true)
                       AnimatedPositioned(
-                        duration: const Duration(milliseconds: 1000),
+                        duration: const Duration(milliseconds: 200),
                         top: animatedState.topOffset,
-                        // bottom: 0,
+                        left: animatedState.animationStep2 == true ? 0 : 16,
+                        right: animatedState.animationStep2 == true ? 0 : 16,
                         child: _MyAnimatedWidget(
                           communities: state.communities,
                           state: animatedState,
@@ -97,22 +109,120 @@ class _MyPrimaryWidget extends StatelessWidget {
         child: Container(
           key: _widgetKey,
           width: double.infinity,
-          height: 300,
+          height: 480,
           decoration: BoxDecoration(
-            color: Colors.blue[900],
+            color: Colors.grey[800],
             borderRadius: BorderRadius.circular(10),
           ),
-          child: ListView.builder(
-            itemCount: 4,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                height: 50,
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                color: Colors.red,
-              );
-            },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  getStrings().top10,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                  ),
+                ),
+                Text(
+                  getStrings().topCommunitiesOnOutgrid,
+                  style: const TextStyle(color: Colors.white38),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: communities.length >= 4 ? 4 : communities.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final CommunityItem community = communities[index];
+                      return _BuildCommunityRow(
+                        item: community,
+                        even: index % 2 == 0,
+                      );
+                    },
+                  ),
+                ),
+                const Divider(
+                  color: Colors.white24,
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      getStrings().viewAll,
+                      style: const TextStyle(color: Colors.white38),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BuildCommunityRow extends StatelessWidget {
+  final CommunityItem item;
+  final bool even;
+
+  const _BuildCommunityRow({Key? key, required this.item, required this.even})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: even ? Colors.white10 : null,
+        borderRadius: BorderRadius.circular(
+          20,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            height: 50,
+            width: 50,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: item.imageUrl != null
+                ? CircleAvatar(backgroundImage: NetworkImage(item.imageUrl!))
+                : null,
+          ),
+          const SizedBox(
+            width: 15,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                "${item.usersCount} Members",
+                style: const TextStyle(
+                  color: Colors.white38,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+        ],
       ),
     );
   }
@@ -134,31 +244,54 @@ class _MyAnimatedWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        BlocProvider.of<AnimatedWidgetBloc>(context).expandWidget(
-          context,
-          _widgetKey,
-        );
+        BlocProvider.of<AnimatedWidgetBloc>(context).collapseWidget();
       },
-      child: AnimatedPadding(
-        duration: const Duration(milliseconds: 1000),
-        padding: EdgeInsets.all(state.animationStep2 ? 0 : 16),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 1000),
-          width: getScreenSize(context).width,
-          height: state.height,
-          decoration: BoxDecoration(
-            color: Colors.blue[900],
-            borderRadius: BorderRadius.circular(10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: getScreenSize(context).width,
+        height: state.height,
+        decoration: BoxDecoration(
+          color: Colors.grey[800],
+          borderRadius: BorderRadius.circular(
+            state.animationStep2 ? 0 : 10,
           ),
-          child: ListView.builder(
-            itemCount: communities.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                height: 50,
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                color: Colors.red,
-              );
-            },
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                getStrings().top10,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                ),
+              ),
+              Text(
+                getStrings().topCommunitiesOnOutgrid,
+                style: const TextStyle(color: Colors.white38),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: communities.length,
+                  // padding to see last widget
+                  padding: const EdgeInsets.only(bottom: 60),
+                  itemBuilder: (BuildContext context, int index) {
+                    final CommunityItem community = communities[index];
+                    return _BuildCommunityRow(
+                      item: community,
+                      even: index % 2 == 0,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -179,7 +312,7 @@ class _SomeWidget extends StatelessWidget {
         height: height,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.black54,
+          color: Colors.grey[900],
           borderRadius: BorderRadius.circular(10),
         ),
       ),

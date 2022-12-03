@@ -7,50 +7,67 @@ class AnimatedWidgetBloc extends Cubit<AnimatedWidgetState> {
       : super(
           AnimatedWidgetState(
             height: 400,
-            isExpanded: false,
-            animationStep2: false,
             topOffset: null,
+            widgetStartOffset: null,
           ),
         );
 
   void expandWidget(BuildContext context, GlobalKey widgetKey) async {
     getWidgetInfo(widgetKey: widgetKey);
-    await Future.delayed(const Duration(milliseconds: 100));
-    emit(
-      state.copyWith(
-        topOffset: state.isExpanded == false ? state.topOffset : null,
-        isExpanded: !state.isExpanded,
-      ),
-    );
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 50));
+    //Step 1 Add animated widget on top on another
+
+    emit(state.copyWith(topOffset: state.topOffset, startAnimation: true));
+
     emit(
       state.copyWith(
         topOffset: state.topOffset,
-        height: !state.isExpanded == true
-            ? MediaQuery.of(context).size.height
-            : 400,
+        isExpanded: !state.isExpanded,
       ),
     );
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 200));
+    //Step 2 Expand the animated widget
     emit(
       state.copyWith(
-        topOffset: state.isExpanded == false ? 0 : null,
+        topOffset: 0,
         animationStep2: true,
+        height: MediaQuery.of(context).size.height,
       ),
     );
   }
 
+  void collapseWidget() async {
+    emit(
+      state.copyWith(
+        topOffset: state.widgetStartOffset,
+        height: 400,
+        animationStep2: false,
+      ),
+    );
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    emit(state.copyWith(
+      topOffset: state.topOffset,
+      startAnimation: false,
+    ));
+  }
+
   void getWidgetInfo({required GlobalKey widgetKey}) async {
-    if (state.topOffset == null) {
-      await Future.delayed(const Duration(milliseconds: 50));
-      final RenderBox? renderBox =
-          widgetKey.currentContext?.findRenderObject() as RenderBox?;
+    await Future.delayed(const Duration(milliseconds: 50));
+    final RenderBox? renderBox =
+        widgetKey.currentContext?.findRenderObject() as RenderBox?;
 
-      if (renderBox != null) {
-        final Offset offset = renderBox.localToGlobal(Offset.zero);
+    if (renderBox != null) {
+      final Offset offset = renderBox.localToGlobal(Offset.zero);
 
-        emit(state.copyWith(topOffset: offset.dy));
-      }
+      int appBarHeight = 50;
+
+      emit(
+        state.copyWith(
+          topOffset: offset.dy - appBarHeight,
+          widgetStartOffset: offset.dy - appBarHeight,
+        ),
+      );
     }
   }
 }
