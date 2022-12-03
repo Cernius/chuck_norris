@@ -85,6 +85,65 @@ class MainScreen extends StatelessWidget {
   }
 }
 
+class _MyAnimatedWidget extends StatelessWidget {
+  final double? height;
+  final List<CommunityItem> communities;
+  final AnimatedWidgetState state;
+
+  const _MyAnimatedWidget({
+    Key? key,
+    required this.state,
+    required this.height,
+    required this.communities,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        BlocProvider.of<AnimatedWidgetBloc>(context).collapseWidget();
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: getScreenSize(context).width,
+        height: state.height,
+        decoration: BoxDecoration(
+          color: Colors.grey[800],
+          borderRadius: BorderRadius.circular(
+            state.animationStep2 ? 0 : 10,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _BuildTitleSubtitle(),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: communities.length,
+                  // padding to see last widget
+                  padding: const EdgeInsets.only(bottom: 60),
+                  itemBuilder: (BuildContext context, int index) {
+                    final CommunityItem community = communities[index];
+                    return _BuildCommunityRow(
+                      item: community,
+                      even: index % 2 == 0,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _MyPrimaryWidget extends StatelessWidget {
   final double? height;
   final List<CommunityItem> communities;
@@ -120,17 +179,7 @@ class _MyPrimaryWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  getStrings().top10,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                  ),
-                ),
-                Text(
-                  getStrings().topCommunitiesOnOutgrid,
-                  style: const TextStyle(color: Colors.white38),
-                ),
+                const _BuildTitleSubtitle(),
                 const SizedBox(
                   height: 16,
                 ),
@@ -176,21 +225,21 @@ class _BuildCommunityRow extends StatelessWidget {
   const _BuildCommunityRow({Key? key, required this.item, required this.even})
       : super(key: key);
 
+  final double imageSize = 50;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: even ? Colors.white10 : null,
-        borderRadius: BorderRadius.circular(
-          20,
-        ),
+        borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Container(
-            height: 50,
-            width: 50,
+            height: imageSize,
+            width: imageSize,
             decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
@@ -199,9 +248,7 @@ class _BuildCommunityRow extends StatelessWidget {
                 ? CircleAvatar(backgroundImage: NetworkImage(item.imageUrl!))
                 : null,
           ),
-          const SizedBox(
-            width: 15,
-          ),
+          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -223,77 +270,6 @@ class _BuildCommunityRow extends StatelessWidget {
           ),
           const Spacer(),
         ],
-      ),
-    );
-  }
-}
-
-class _MyAnimatedWidget extends StatelessWidget {
-  final double? height;
-  final List<CommunityItem> communities;
-  final AnimatedWidgetState state;
-
-  const _MyAnimatedWidget({
-    Key? key,
-    required this.state,
-    required this.height,
-    required this.communities,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        BlocProvider.of<AnimatedWidgetBloc>(context).collapseWidget();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: getScreenSize(context).width,
-        height: state.height,
-        decoration: BoxDecoration(
-          color: Colors.grey[800],
-          borderRadius: BorderRadius.circular(
-            state.animationStep2 ? 0 : 10,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                getStrings().top10,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                ),
-              ),
-              Text(
-                getStrings().topCommunitiesOnOutgrid,
-                style: const TextStyle(color: Colors.white38),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: communities.length,
-                  // padding to see last widget
-                  padding: const EdgeInsets.only(bottom: 60),
-                  itemBuilder: (BuildContext context, int index) {
-                    final CommunityItem community = communities[index];
-                    return _BuildCommunityRow(
-                      item: community,
-                      even: index % 2 == 0,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -337,6 +313,30 @@ class MyPageRouteBuilder<T> extends PageRouteBuilder<T> {
       animation,
       secondaryAnimation,
       child,
+    );
+  }
+}
+
+class _BuildTitleSubtitle extends StatelessWidget {
+  const _BuildTitleSubtitle({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          getStrings().top10,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 32,
+          ),
+        ),
+        Text(
+          getStrings().topCommunitiesOnOutgrid,
+          style: const TextStyle(color: Colors.white38),
+        ),
+      ],
     );
   }
 }
